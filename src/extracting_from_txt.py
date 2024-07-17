@@ -5,6 +5,8 @@ import os
 
 """_______________Extract data from TXT file_______________________________________________"""
 # search for specific target
+
+
 def search_fn(line, target):
     for i in line:
         i = i.lower()
@@ -15,9 +17,8 @@ def search_fn(line, target):
     return None
 
 
-
 # open results2.txt for extracting data
-with open("HousePriseEstimation/parsing_result.txt", "r", encoding="utf-8") as f:   
+with open("HousePriseEstimation/parsing_result.txt", "r", encoding="utf-8") as f:
     lines = f.readlines()
     i = 0
     # columns
@@ -48,7 +49,15 @@ with open("HousePriseEstimation/parsing_result.txt", "r", encoding="utf-8") as f
         number_of_rooms.append(int(first[0].split('-')[0]))
 
         # owners
-        owners.append(line[-5])
+        own = line[-5]
+        if 'хозяин' in own:
+            owners.append('хозяин недвижимости')
+        elif 'cпец' in own:
+            owners.append('cпециалист')
+        elif 'крыша' in own:
+            owners.append('крыша агент')
+        else:
+            owners.append('новостройка')
 
         # area
         areas.append(float(first[1].split()[0]))
@@ -59,8 +68,9 @@ with open("HousePriseEstimation/parsing_result.txt", "r", encoding="utf-8") as f
         else:
             level.append(int(line[0].split(', ')[2].split()[0].split('/')[0]))
             try:
-                
-                levels.append(int(line[0].split(', ')[2].split()[0].split('/')[1]))
+
+                levels.append(
+                    int(line[0].split(', ')[2].split()[0].split('/')[1]))
             except Exception as e:
                 levels.append(np.nan)
 
@@ -75,7 +85,7 @@ with open("HousePriseEstimation/parsing_result.txt", "r", encoding="utf-8") as f
 
         # location
         third = line[2].lower().split(', ')
-        
+
         microdistrict = np.nan
         street = np.nan
         if len(third) > 2:
@@ -98,12 +108,12 @@ with open("HousePriseEstimation/parsing_result.txt", "r", encoding="utf-8") as f
                 microdistrict = third[1]
             else:
                 street = third[1]
-                
+
         microdistricts.append(microdistrict)
         streets.append(street)
 
         # build year
-        years.append(int(search_fn(line, 'г.п').split()[0])) # type: ignore
+        years.append(int(search_fn(line, 'г.п').split()[0]))  # type: ignore
 
         # ceiling height
         ceiling = search_fn(line, 'потолки')
@@ -139,8 +149,7 @@ with open("HousePriseEstimation/parsing_result.txt", "r", encoding="utf-8") as f
         repaired = search_fn(line, 'ремонт')
         dirty_repair = search_fn(line, 'чернов')
         clean_repair = search_fn(line, 'чистов')
-        
-        
+
         if repaired:
             repaired = repaired.lower()
             if 'требует ремонта' in repaired or 'требуется ремонта' in repaired:
@@ -160,25 +169,26 @@ with open("HousePriseEstimation/parsing_result.txt", "r", encoding="utf-8") as f
             elif 'дизайнер' in repaired:
                 repairs.append('дизайнерский ремонт')
             else:
-                repairs.append('дргуой ремонт')                
+                repairs.append('дргуой ремонт')
         elif dirty_repair:
             dirty_repair = dirty_repair.lower()
             repairs.append('черновая отделка')
-            
+
         elif clean_repair:
             clean_repair = clean_repair.lower()
             if 'предчистов' in clean_repair:
                 repairs.append('предчистовая отделка')
             else:
                 repairs.append('чистовая отделка')
-                
+
         else:
             repairs.append(np.nan)
     for ii in anomals:
         print(ii, end='\n\n')
     print(len(anomals))
     """-------------- Write all data to CSV fie----------------------------------------------------------------"""
-    rows = zip(number_of_rooms, areas, levels, level, prices, districts, microdistricts, streets, years, ceilings, owners, bathrooms, repairs)
+    rows = zip(number_of_rooms, areas, levels, level, prices, districts,
+               microdistricts, streets, years, ceilings, owners, bathrooms, repairs)
 
     # Specify the CSV file path
     csv_file_path = "HousePriseEstimation/houses.csv"
@@ -187,7 +197,8 @@ with open("HousePriseEstimation/parsing_result.txt", "r", encoding="utf-8") as f
     with open(csv_file_path, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         # Write the header row if needed
-        writer.writerow(['numrooms','sqauremeters', 'levels_on_building','level','price','distrcit', 'microdistrict', 'street', 'builtyear','ceilinghight','seller','bathroomtype','repaired'])
+        writer.writerow(['numrooms', 'sqauremeters', 'levels_on_building', 'level', 'price', 'distrcit',
+                        'microdistrict', 'street', 'builtyear', 'ceilinghight', 'seller', 'bathroomtype', 'repaired'])
 
         # Write the data rows
         writer.writerows(rows)
