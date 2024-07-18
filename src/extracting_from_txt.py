@@ -17,8 +17,9 @@ def search_fn(line, target):
     return None
 
 
-# open results2.txt for extracting data
-with open("HousePriseEstimation/parsing_result.txt", "r", encoding="utf-8") as f:
+file_from_extract = 'parsing_results/txt/parsing_result_240717_almaty_18000.txt'
+file_to_save = f'{file_from_extract.split('/')[0]}/csv/{file_from_extract.split('/')[2].split('.')[0]}.csv'
+with open(file_from_extract, "r", encoding="utf-8") as f:
     lines = f.readlines()
     i = 0
     # columns
@@ -61,6 +62,7 @@ with open("HousePriseEstimation/parsing_result.txt", "r", encoding="utf-8") as f
 
         # area
         areas.append(float(first[1].split()[0]))
+        
         # level of building
         if len(first) < 3:
             levels.append(np.nan)
@@ -113,7 +115,15 @@ with open("HousePriseEstimation/parsing_result.txt", "r", encoding="utf-8") as f
         streets.append(street)
 
         # build year
-        years.append(int(search_fn(line, 'г.п').split()[0]))  # type: ignore
+        by = search_fn(line, 'г.п.')
+        if by:
+            years.append(int(by.split()[0]))
+        else:
+            by = search_fn(line, 'г.п')
+            if by:
+                years.append(int(by.split()[0]))
+            else:
+                print(line)
 
         # ceiling height
         ceiling = search_fn(line, 'потолки')
@@ -191,10 +201,8 @@ with open("HousePriseEstimation/parsing_result.txt", "r", encoding="utf-8") as f
                microdistricts, streets, years, ceilings, owners, bathrooms, repairs)
 
     # Specify the CSV file path
-    csv_file_path = "HousePriseEstimation/houses.csv"
-
     # Write the data to the CSV file
-    with open(csv_file_path, mode='w', newline='', encoding='utf-8') as file:
+    with open(file_to_save, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         # Write the header row if needed
         writer.writerow(['numrooms', 'sqauremeters', 'levels_on_building', 'level', 'price', 'distrcit',
