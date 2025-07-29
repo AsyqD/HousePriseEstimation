@@ -1,3 +1,7 @@
 VenvForHPE/
 archive/
+parsing_results/
+src/log/
+src/__pycache__/
 testing.py
+__pycache__/

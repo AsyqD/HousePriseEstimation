@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import csv
 import os
+import infobase
 
 """_______________Extract data from TXT file_______________________________________________"""
 # search for specific target
@@ -84,9 +85,28 @@ def get_price(line):
 
 
 def get_district(line):
+    almaty_districts = infobase.almaty_districts
+    astana_dstricts = infobase.astana_dstricts
+    
     district = search_fn(line, 'р-н')
+    
     if district:
-        return district.split()[0]
+        d = district.split()
+        d = d[0] if d[1] == 'р-н' else d[1]
+        
+        if d in almaty_districts or d in astana_dstricts:
+            return d
+        if 'байконур' in d:
+            return 'байконурский'
+        if 'алмат' in d:
+            return 'алматинский'
+        if 'сарыарк' in d:
+            return 'сарыаркинский'
+        if 'нур' in d:
+            return 'нуринский'
+        if 'есиль' in d:
+            return 'есильский'
+        
     return np.nan
 
 
